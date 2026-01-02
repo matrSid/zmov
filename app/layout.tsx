@@ -6,9 +6,9 @@ import "./globals.css";
 const manrope = Manrope({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "zmov",
+  title: "povertymovie",
   description: "Watch your favorite movies and shows for free!",
-  keywords: "zmov, 123movies, 123movie, 123 movies, movies123, free movies, watch movies online, movies123, fmovies, putlocker, solarmovies",
+  keywords: "povertymovie, 123movies, 123movie, 123 movies, movies123, free movies, watch movies online, movies123, fmovies, putlocker, solarmovies",
 };
 
 export default function RootLayout({

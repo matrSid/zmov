@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "info - zmov",
+  title: "info - povertymovie",
 };
 
 export default function ClientLayout({ children }: Readonly<{ children: React.ReactNode }>) {

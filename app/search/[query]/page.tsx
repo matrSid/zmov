@@ -34,7 +34,7 @@ export default function Search() {
       return;
     }
     
-    document.title = `${decodeURIComponent(query ?? "")} - zmov`;
+    document.title = `${decodeURIComponent(query ?? "")} - povertymovie`;
     
     async function fetchData() {
       setSearchData(null);

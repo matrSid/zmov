@@ -97,7 +97,7 @@ export default function Info() {
   useEffect(() => {
     async function fetchInfoData() {
       const result = await fetchInfo(type, id);
-      document.title = `${result.title || result.name} - zmov`;
+      document.title = `${result.title || result.name} - povertymovie`;
 
       setInfo(result);
     }

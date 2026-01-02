@@ -84,7 +84,7 @@ export default function Watch() {
         if (!existing) {
           const newItem = await fetchInfo(type, id);
           initialSetRef.current = true;
-          document.title = `${newItem.title || ""} - zmov`;
+          document.title = `${newItem.title || ""} - povertymovie`;
 
           await supabase.from("watchedItem").upsert([
             {
@@ -101,7 +101,7 @@ export default function Watch() {
             },
           ]);
         } else {
-          document.title = `${existing.title || ""} - zmov`;
+          document.title = `${existing.title || ""} - povertymovie`;
 
           if (!initialSetRef.current) {
             setInitialProgress(existing.progress ?? 0);
