@@ -133,10 +133,10 @@ export default function Info() {
   useEffect(() => {
     async function fetchWatchedItem() {
       const { data } = await supabase
-        .from('watchedItem')
+        .from('watcheditem')
         .select('*')
-        .eq('userId', user?.id)
-        .eq('itemId', id)
+        .eq('userid', user?.id)
+        .eq('itemid', id)
         .eq('type', type)
         .single();
 

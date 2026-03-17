@@ -46,7 +46,7 @@ export default function Watch() {
   const urls = serverUrls();
   const [selectedUrl, setSelectedUrl] = useState(() => {
     const vidzenDefault =
-      urls.find((item) => item.name === "Vidzen")?.url ?? urls[0].url;
+      urls.find((item) => item.name === "Adless")?.url ?? urls[0].url;
     if (typeof window !== "undefined") {
       const storedServer = localStorage.getItem("lastUsedServer");
       if (storedServer && urls.some((u) => u.url === storedServer)) {
@@ -84,7 +84,13 @@ export default function Watch() {
 
     async function updateOrCreateItem() {
       try {
-        const { data: existing } = await supabase.from("watchedItem").select("*").eq("userId", user?.id).eq("itemId", id).eq("type", type).single();
+        const { data: existing } = await supabase
+          .from("watcheditem")
+          .select("*")
+          .eq("userid", user?.id)
+          .eq("itemid", id)
+          .eq("type", type)
+          .single();
 
         if (!existing) {
           const newItem = await fetchInfo(type, id);
@@ -94,10 +100,10 @@ export default function Watch() {
           setEpisodesLength(seasonInfo?.episode_count ?? 0);
           setSeasonLength(newItem.number_of_seasons);
 
-          await supabase.from("watchedItem").upsert([
+          await supabase.from("watcheditem").upsert([
             {
-              userId: user?.id,
-              itemId: id,
+              userid: user?.id,
+              itemid: id,
               type,
               title: newItem.title || newItem.name || "",
               poster: newItem.backdrop_path
@@ -105,11 +111,11 @@ export default function Watch() {
                 : "",
               episode: episode,
               season: season,
-              numOfEpisodes: seasonInfo?.episode_count ?? 0,
-              numOfSeasons: newItem.number_of_seasons,
+              numofepisodes: seasonInfo?.episode_count ?? 0,
+              numofseasons: newItem.number_of_seasons,
               progress: watchProgress,
               duration: durationData,
-              createdAt: new Date(),
+              createdat: new Date(),
             },
           ]);
         } else {
@@ -131,16 +137,16 @@ export default function Watch() {
           }
 
           await supabase
-            .from("watchedItem")
+            .from("watcheditem")
             .update({
               episode : episode,
               season: season,
               progress: watchProgress,
               duration: durationData,
-              createdAt: new Date(),
+              createdat: new Date(),
             })
-            .eq("userId", user?.id)
-            .eq("itemId", id)
+            .eq("userid", user?.id)
+            .eq("itemid", id)
             .eq("type", type)
         }
       } catch (e) {

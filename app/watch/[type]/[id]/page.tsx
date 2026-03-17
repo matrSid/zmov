@@ -44,7 +44,7 @@ export default function Watch() {
   const urls = serverUrls();
   const [selectedUrl, setSelectedUrl] = useState(() => {
     const vidzenDefault =
-      urls.find((item) => item.name === "Vidzen")?.url ?? urls[0].url;
+      urls.find((item) => item.name === "Adless")?.url ?? urls[0].url;
     if (typeof window !== "undefined") {
       const storedServer = localStorage.getItem("lastUsedServer");
       if (storedServer && urls.some((u) => u.url === storedServer)) {
@@ -78,10 +78,10 @@ export default function Watch() {
     async function updateOrCreateItem() {
       try {
         const { data: existing } = await supabase
-          .from("watchedItem")
+          .from("watcheditem")
           .select("*")
-          .eq("userId", user?.id)
-          .eq("itemId", id)
+          .eq("userid", user?.id)
+          .eq("itemid", id)
           .eq("type", type)
           .single();
 
@@ -90,10 +90,10 @@ export default function Watch() {
           initialSetRef.current = true;
           document.title = `${newItem.title || ""} - povertymovie`;
 
-          await supabase.from("watchedItem").upsert([
+          await supabase.from("watcheditem").upsert([
             {
-              userId: user?.id,
-              itemId: id,
+              userid: user?.id,
+              itemid: id,
               type,
               title: newItem.title || newItem.name || "",
               poster: newItem.backdrop_path
@@ -101,7 +101,7 @@ export default function Watch() {
                 : "",
               progress: watchProgress,
               duration: durationData,
-              createdAt: new Date(),
+              createdat: new Date(),
             },
           ]);
         } else {
@@ -113,14 +113,14 @@ export default function Watch() {
           }
 
           await supabase
-            .from("watchedItem")
+            .from("watcheditem")
             .update({
               progress: watchProgress,
               duration: durationData,
-              createdAt: new Date(),
+              createdat: new Date(),
             })
-            .eq("userId", user?.id)
-            .eq("itemId", id)
+            .eq("userid", user?.id)
+            .eq("itemid", id)
             .eq("type", type);
         }
       } catch (e) {
