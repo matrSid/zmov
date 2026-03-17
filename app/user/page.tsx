@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Header from '@/app/components/Header';
 import Footer from '@/app/components/Footer';
 import WatchCard, { WatchCardData } from '@/app/components/WatchCard';
@@ -24,46 +24,70 @@ export default function Home() {
   const [editingProfile, setEditingProfile] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (data.session) {
-        setUser(data.session.user);
-        setProfileName(data.session.user.user_metadata?.name ?? "");
-        setAvatarUrl(data.session.user.user_metadata?.avatar_url ?? "");
-        fetchWatchedItems(data.session.user.id);
-      } else {
-        router.push('/login')
-        setUser(null);
-        setWatchedItems([]);
+  const fetchWatchedItems = useCallback(async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('watcheditem')
+        .select('*')
+        .eq('userid', userId)
+        .order('createdat', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching watched items:', error);
+        return;
       }
-    });
+
+      if (data) {
+        const mapped: WatchItem[] = data.map((row: any) => ({
+          id: row.id,
+          itemId: row.itemid,
+          title: row.title,
+          poster: row.poster,
+          duration: row.duration,
+          progress: row.progress,
+          type: row.type,
+          season: row.season ?? undefined,
+          episode: row.episode ?? undefined,
+          createdAt: row.createdat,
+        }));
+        setWatchedItems(mapped);
+      }
+    } catch (e) {
+      console.error('Failed to fetch watched items', e);
+    }
   }, []);
 
-  const fetchWatchedItems = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('watcheditem')
-      .select('*')
-      .eq('userid', userId)
-      .order('createdat', { ascending: false });
+  useEffect(() => {
+    let mounted = true;
 
-    if (error) {
-      console.error('Error fetching watched items:', error);
-    } else if (data) {
-      const mapped: WatchItem[] = data.map((row: any) => ({
-        id: row.id,
-        itemId: row.itemid,
-        title: row.title,
-        poster: row.poster,
-        duration: row.duration,
-        progress: row.progress,
-        type: row.type,
-        season: row.season ?? undefined,
-        episode: row.episode ?? undefined,
-        createdAt: row.createdat,
-      }));
-      setWatchedItems(mapped);
-    }
-  };
+    const init = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (!mounted) return;
+
+        if (data.session) {
+          setUser(data.session.user);
+          setProfileName(data.session.user.user_metadata?.name ?? "");
+          setAvatarUrl(data.session.user.user_metadata?.avatar_url ?? "");
+          // fetch watched items for logged in user
+          await fetchWatchedItems(data.session.user.id);
+        } else {
+          // not logged in
+          router.push('/login');
+          setUser(null);
+          setWatchedItems([]);
+        }
+      } catch (e) {
+        console.error('Error getting session', e);
+      }
+    };
+
+    init();
+
+    return () => {
+      mounted = false;
+    };
+  }, [fetchWatchedItems, router]);
 
   const signOutUser = async () => {
     const { error } = await supabase.auth.signOut();
@@ -114,20 +138,21 @@ export default function Home() {
       let newAvatarUrl = avatarUrl || null;
 
       if (avatarFile) {
-        const fileExt = avatarFile.name.split(".").pop();
-        const filePath = `avatars/${user.id}-${Date.now()}.${fileExt || "png"}`;
+        const fileExt = avatarFile.name.split('.').pop();
+        const filePath = `avatars/${user.id}-${Date.now()}.${fileExt || 'png'}`;
 
         const { error: uploadError } = await supabase.storage
-          .from("avatars")
+          .from('avatars')
           .upload(filePath, avatarFile, { upsert: true });
 
         if (uploadError) {
           setProfileError(uploadError.message);
+          setSavingProfile(false);
           return;
         }
 
         const { data: publicData } = supabase.storage
-          .from("avatars")
+          .from('avatars')
           .getPublicUrl(filePath);
 
         newAvatarUrl = publicData.publicUrl;
@@ -152,7 +177,7 @@ export default function Home() {
         setEditingProfile(false);
       }
     } catch (e) {
-      setProfileError("Failed to update profile.");
+      setProfileError('Failed to update profile.');
       console.error(e);
     } finally {
       setSavingProfile(false);
@@ -259,8 +284,8 @@ export default function Home() {
                 <p className="text-white/70">No items to continue watching.</p>
               </div>
             ) : ( watchedItems.map((item) => (
-              <WatchCard key={`${item.itemId}-${item.type}`} data={item} onRemove={() => removeWatchItem(item.itemId, item.type)}/>
-            )))}
+              <WatchCard key={item.id} data={item} onRemove={() => removeWatchItem(item.itemId, item.type)}/>
+            ))) }
           </div>
         </div>
         
