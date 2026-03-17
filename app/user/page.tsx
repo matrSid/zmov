@@ -38,6 +38,7 @@ export default function Home() {
       }
 
       if (data) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const mapped: WatchItem[] = data.map((row: any) => ({
           id: row.id,
           itemId: row.itemid,
