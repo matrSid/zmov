@@ -30,6 +30,12 @@ export default function serverUrls() {
       url: 'https://vidora.su',
       params: '?color=e80000&autonextepisode=false&autoplay=false&startAt='
     },
+    {
+      id: '6',
+      name: 'Vidzen',
+      url: 'https://vidzen.fun',
+      params: ''
+    },
     
   ];
 }

@@ -43,11 +43,15 @@ type SourceHandlers = Record<
 export default function Watch() {
   const urls = serverUrls();
   const [selectedUrl, setSelectedUrl] = useState(() => {
+    const vidzenDefault =
+      urls.find((item) => item.name === "Vidzen")?.url ?? urls[0].url;
     if (typeof window !== "undefined") {
       const storedServer = localStorage.getItem("lastUsedServer");
-      if (storedServer) return storedServer;
+      if (storedServer && urls.some((u) => u.url === storedServer)) {
+        return storedServer;
+      }
     }
-    return urls[0].url;
+    return vidzenDefault;
   });
   const [urlParams, setUrlParams] = useState(() => {
     const initial = urls.find((item) => item.url === selectedUrl);
