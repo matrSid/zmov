@@ -16,6 +16,11 @@ const baseConfig: NextConfig = {
         hostname: "lh3.googleusercontent.com",
         pathname: "/a/**",
       },
+      // ADD THIS:
+      {
+        protocol: "https",
+        hostname: "s4.anilist.co",
+      },
     ],
   },
 };

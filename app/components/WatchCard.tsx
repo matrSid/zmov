@@ -8,7 +8,7 @@ export type WatchCardData = {
   title: string;
   duration: number;
   progress: number;
-  type: 'movie' | 'tv';
+  type: 'movie' | 'tv' | 'anime'; // added 'anime'
   itemId: number;
   season?: number;
   episode?: number;
@@ -20,8 +20,13 @@ type WatchCardProps = {
 };
 
 export default function WatchCard({ data, onRemove }: WatchCardProps) {
+  const href =
+    data.type === 'anime'
+      ? `/anime/${data.itemId}`
+      : `/watch/${data.type}/${data.itemId}${data.type === 'tv' ? `/${data.season}/${data.episode}` : ''}`;
+
   return (
-    <Link href={`/watch/${data.type}/${data.itemId}${data.type === 'tv' ? `/${data.season}/${data.episode}` : ''}`} className="relative group overflow-hidden rounded-lg border border-white/10" prefetch={false}>
+    <Link href={href} className="relative group overflow-hidden rounded-lg border border-white/10" prefetch={false}>
       <Image
         src={data.poster}
         alt="Poster"
@@ -35,17 +40,38 @@ export default function WatchCard({ data, onRemove }: WatchCardProps) {
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash2-icon lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
         </button>
         <div className='flex flex-col w-full justify-between absolute bottom-3 left-0 p-2'>
-          {data.type === 'tv' ? ( 
+          {/* Progress label per type */}
+          {data.type === 'tv' && (
             <div className='font-light text-sm'>Watching S{data.season} Episode-{data.episode}</div>
-          ) : ( '' )}
+          )}
+          {data.type === 'anime' && (
+            <div className='font-light text-sm flex items-center gap-1.5'>
+              <span className="text-xs bg-purple-600/70 text-white px-1.5 py-0.5 rounded font-medium">ANIME</span>
+              Episode {data.episode ?? data.progress}
+            </div>
+          )}
           <div className="flex justify-between w-full">
             <p className='font-medium'>{data.title}</p>
-            <p>{Math.floor((data.duration - data.progress) / 3600)}h {Math.floor(((data.duration - data.progress) % 3600) / 60)}m left</p>
+            {/* For anime show total eps remaining, for movie/tv show time remaining */}
+            {data.type === 'anime' ? (
+              data.duration
+                ? <p>{data.duration - (data.episode ?? data.progress)} eps left</p>
+                : <p>Ep {data.episode ?? data.progress}</p>
+            ) : (
+              <p>{Math.floor((data.duration - data.progress) / 3600)}h {Math.floor(((data.duration - data.progress) % 3600) / 60)}m left</p>
+            )}
           </div>
         </div>
         <div className="absolute bottom-0 w-full p-2">
           <div className="bg-neutral-500/20 rounded-md w-full h-2">
-            <div className='h-full bg-red-900 rounded-md' style={{ width: `${(data.progress / data.duration) * 100}%` }}></div>
+            <div
+              className={`h-full rounded-md ${data.type === 'anime' ? 'bg-purple-700' : 'bg-red-900'}`}
+              style={{
+                width: data.type === 'anime'
+                  ? data.duration ? `${((data.episode ?? data.progress) / data.duration) * 100}%` : '0%'
+                  : `${(data.progress / data.duration) * 100}%`
+              }}
+            />
           </div>
         </div>
       </div>
